@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -33,11 +33,25 @@ function ScrollManager() {
   return null;
 }
 
+/** One-off message passed via navigate(..., { state: { notice } }), e.g. after deleting an account. */
+function FlashNotice() {
+  const location = useLocation();
+  const [text, setText] = useState(null);
+  useEffect(() => { if (location.state?.notice) setText(location.state.notice); }, [location.state]);
+  if (!text) return null;
+  return (
+    <div className="flash" role="status">
+      <div className="wrap"><span>{text}</span><button className="btn btn-ghost btn-sm" onClick={() => setText(null)} aria-label="Dismiss">✕</button></div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <ScrollManager />
       <Header />
+      <FlashNotice />
       <main>
         <Routes>
           <Route path="/" element={<Home />} />

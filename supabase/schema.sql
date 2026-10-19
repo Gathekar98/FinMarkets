@@ -37,3 +37,24 @@ create policy "own watchlist" on public.watchlist
 
 create index if not exists holdings_user_idx  on public.holdings (user_id);
 create index if not exists watchlist_user_idx on public.watchlist (user_id);
+
+-- ---------------------------------------------------------------------------
+-- Self-service account deletion.
+-- Runs with owner rights but only ever deletes the caller's own auth user
+-- (auth.uid()). Their holdings and watchlist rows go with it via ON DELETE CASCADE.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not signed in';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

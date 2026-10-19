@@ -57,6 +57,19 @@ export function AuthProvider({ children }) {
       updatePassword: (password) => (supabase ? run(supabase.auth.updateUser({ password })) : notConfigured()),
       updateProfile: (fullName) => (supabase ? run(supabase.auth.updateUser({ data: { full_name: fullName } })) : notConfigured()),
       signOut: () => (supabase ? supabase.auth.signOut() : null),
+      /** Permanently deletes the signed-in user (and, via cascade, their holdings and watchlist). */
+      deleteAccount: async () => {
+        if (!supabase) return notConfigured();
+        const { error } = await supabase.rpc('delete_my_account');
+        if (error) {
+          if (error.code === 'PGRST202' || /Could not find the function/i.test(error.message)) {
+            throw new Error('Account deletion is not switched on yet. Please contact support and we will delete your account for you.');
+          }
+          throw friendly(error);
+        }
+        // The session now points at a user that no longer exists; clear it locally.
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      },
     };
   }, [session, loading]);
 

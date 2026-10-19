@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWatchlist } from '../api/userData';
 import { useApi, LIVE } from '../api/client';
@@ -44,6 +44,57 @@ function Watchlist() {
   );
 }
 
+function DeleteAccount() {
+  const { user, deleteAccount } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const ready = confirm.trim().toUpperCase() === 'DELETE';
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!ready) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await deleteAccount();
+      navigate('/', { replace: true, state: { notice: 'Your account and all its data have been permanently deleted.' } });
+    } catch (ex) {
+      setErr(ex.message);
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="card card-pad danger-zone" aria-labelledby="del-title">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ maxWidth: 560 }}>
+          <h3 id="del-title">Delete my account</h3>
+          <p className="small muted" style={{ marginTop: 6 }}>
+            Permanently deletes your login ({user?.email}), your portfolio holdings and your watchlist. This cannot be undone.
+          </p>
+        </div>
+        {!open && <button className="btn btn-danger" onClick={() => setOpen(true)}>Delete account…</button>}
+      </div>
+      {open && (
+        <form onSubmit={submit} style={{ display: 'grid', gap: 12, marginTop: 16, maxWidth: 420 }}>
+          <div className="field">
+            <label htmlFor="del-confirm">Type <strong>DELETE</strong> to confirm</label>
+            <input id="del-confirm" className="input" autoComplete="off" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoFocus />
+          </div>
+          {err && <div className="form-msg err" role="alert">{err}</div>}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn btn-danger" disabled={!ready || busy}>{busy ? 'Deleting…' : 'Permanently delete my account'}</button>
+            <button type="button" className="btn" onClick={() => { setOpen(false); setConfirm(''); setErr(''); }}>Cancel</button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
 export default function Account() {
   const { user, displayName, updateProfile, updatePassword, signOut } = useAuth();
   const [name, setName] = useState(displayName);
@@ -77,6 +128,7 @@ export default function Account() {
             </form>
           </div>
           {msg && <div className={`form-msg ${msg.ok ? 'ok' : 'err'}`} role="status">{msg.text}</div>}
+          <DeleteAccount />
         </div>
       </section>
     </>
