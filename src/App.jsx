@@ -1,26 +1,46 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import useSeo from './seo/useSeo';
+import { PAGES } from './seo/meta';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
-import Funds from './pages/Funds';
-import FundDetail from './pages/FundDetail';
-import Stocks from './pages/Stocks';
-import StockDetail from './pages/StockDetail';
-import Markets from './pages/Markets';
-import Ipo from './pages/Ipo';
-import Tools from './pages/Tools';
-import Portfolio from './pages/Portfolio';
-import Learn from './pages/Learn';
-import Stories from './pages/Stories';
-import StoryDetail from './pages/StoryDetail';
-import Pricing from './pages/Pricing';
 import NotFound from './pages/NotFound';
-import Account from './pages/Account';
-import { Login, Signup, ForgotPassword, ResetPassword, RequireAuth } from './pages/Auth';
+
+// Every page except Home is loaded on demand, keeping the first download small.
+const Funds = lazy(() => import('./pages/Funds'));
+const FundDetail = lazy(() => import('./pages/FundDetail'));
+const Stocks = lazy(() => import('./pages/Stocks'));
+const StockDetail = lazy(() => import('./pages/StockDetail'));
+const Markets = lazy(() => import('./pages/Markets'));
+const Ipo = lazy(() => import('./pages/Ipo'));
+const Tools = lazy(() => import('./pages/Tools'));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Learn = lazy(() => import('./pages/Learn'));
+const Stories = lazy(() => import('./pages/Stories'));
+const StoryDetail = lazy(() => import('./pages/StoryDetail'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Account = lazy(() => import('./pages/Account'));
+const authPage = (name) => lazy(() => import('./pages/Auth').then((m) => ({ default: m[name] })));
+const Login = authPage('Login');
+const Signup = authPage('Signup');
+const ForgotPassword = authPage('ForgotPassword');
+const ResetPassword = authPage('ResetPassword');
+const RequireAuth = authPage('RequireAuth');
 import { AuthProvider } from './auth/AuthContext';
 
 /** Scroll to top on route change, or to the #anchor when one is present. */
+/** Titles and descriptions for the fixed pages; detail pages set their own. */
+function StaticSeo() {
+  useSeo();
+  return null;
+}
+
+function SeoForRoute() {
+  const { pathname } = useLocation();
+  return PAGES[pathname] ? <StaticSeo key={pathname} /> : null;
+}
+
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -50,9 +70,11 @@ export default function App() {
   return (
     <AuthProvider>
       <ScrollManager />
+      <SeoForRoute />
       <Header />
       <FlashNotice />
       <main>
+        <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/funds" element={<Funds />} />
@@ -74,6 +96,7 @@ export default function App() {
           <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
     </AuthProvider>

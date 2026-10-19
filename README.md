@@ -70,3 +70,14 @@ src/
   data/        editorial content only
 supabase/schema.sql
 ```
+
+## SEO
+
+- Page titles/descriptions/structured data live in `src/seo/meta.js` (shared by browser and server).
+- `server/seo.js` puts the right `<head>` tags into the HTML for every URL (crawlers and link previews
+  don't run JavaScript), and serves `/robots.txt` and `/sitemap.xml` (all funds, stocks and stories).
+- Moving to a custom domain: change `SITE_URL` in `src/seo/meta.js` and the URLs in `index.html`.
+- Search engine verification: set `GOOGLE_SITE_VERIFICATION` and/or `BING_SITE_VERIFICATION`
+  (the `content` value of their meta tag) as Vercel environment variables and redeploy.
+- Share image and icons (`public/og-image.png`, `icon-*.png`, `apple-touch-icon.png`) are rendered from SVG
+  with the brand fonts; regenerate them if the logo changes.

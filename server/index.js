@@ -4,7 +4,7 @@ import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { app, svc } from './app.js';
+import { app, svc, mountPages } from './app.js';
 
 // `--port` (used by `npm run dev`) wins over PORT, so a dev tool's PORT for the web server can't collide with the API.
 const portArg = process.argv.indexOf('--port');
@@ -14,7 +14,7 @@ const DIST = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist
 // Production: serve the built SPA
 if (fs.existsSync(DIST)) {
   app.use(express.static(DIST, { maxAge: '1h', index: false }));
-  app.get('*', (req, res) => res.sendFile(path.join(DIST, 'index.html')));
+  mountPages(app);
 }
 
 app.listen(PORT, () => {

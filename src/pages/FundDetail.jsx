@@ -8,6 +8,8 @@ import { ErrorBox, Skeleton, SkeletonRows } from '../components/ui/Status';
 import WatchButton from '../components/ui/WatchButton';
 import { num, pctPlain, rupee } from '../utils/format';
 import NotFound from './NotFound';
+import useSeo from '../seo/useSeo';
+import { fundMeta, NOT_FOUND, PAGES } from '../seo/meta';
 
 const SECTIONS = [['overview', 'Overview'], ['performance', 'Performance'], ['risk', 'Risk'], ['peers', 'Peers']];
 const PERIODS = [['1y', '1Y'], ['3y', '3Y'], ['5y', '5Y'], ['10y', '10Y']];
@@ -58,6 +60,7 @@ function verdict(f) {
 export default function FundDetail() {
   const { id } = useParams();
   const { data: f, loading, error, reload } = useApi(`/api/funds/${id}`);
+  useSeo(error?.message === 'Not found' ? NOT_FOUND : f ? fundMeta(f) : { ...PAGES['/funds'], title: 'Mutual fund | finMarkets' });
 
   if (error?.message === 'Not found') return <NotFound />;
   if (loading || !f) {

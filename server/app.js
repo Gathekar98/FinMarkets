@@ -4,6 +4,7 @@
 import express from 'express';
 import compression from 'compression';
 import * as svc from './services.js';
+import { renderPage, robots, sitemap } from './seo.js';
 
 export const app = express();
 
@@ -54,5 +55,12 @@ app.get('/api/prices', route((req) => svc.prices(req.query), 30));
 app.get('/api/search', route((req) => svc.search(String(req.query.q || '')), 300));
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Unknown endpoint' }));
+
+/** robots.txt, sitemap.xml and server-rendered <head> tags for every page. Call after static files. */
+export function mountPages(target = app) {
+  target.get('/robots.txt', robots);
+  target.get('/sitemap.xml', sitemap);
+  target.get('*', renderPage);
+}
 
 export { svc };

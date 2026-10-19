@@ -6,11 +6,26 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "memory": 1024
+      "memory": 1024,
+      "includeFiles": "dist/index.html"
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/((?!assets/|favicon\\.svg).*)", "destination": "/index.html" }
+    {
+      "source": "/robots.txt",
+      "destination": "/api"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
   ]
 }

@@ -88,3 +88,4 @@ button { cursor: pointer; }
   :root { --gutter: 16px; }
   .section { padding: 40px 0; }
 }
+.page-loading { min-height: 70vh; }

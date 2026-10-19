@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import useSeo from '../seo/useSeo';
+import { NOT_FOUND } from '../seo/meta';
 
 export default function NotFound() {
+  useSeo(NOT_FOUND);
   return (
     <section className="section">
       <div className="wrap" style={{ textAlign: 'center', maxWidth: 560, padding: '60px var(--gutter)' }}>

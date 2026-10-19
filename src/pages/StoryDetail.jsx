@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { authors, stories, storyById } from '../data/stories';
 import StoryCard, { StoryArt, initials } from '../components/ui/StoryCard';
 import NotFound from './NotFound';
+import useSeo from '../seo/useSeo';
+import { storyMeta, NOT_FOUND } from '../seo/meta';
 
 function ReadingProgress() {
   const [pct, setPct] = useState(0);
@@ -47,6 +49,7 @@ function Share({ title }) {
 export default function StoryDetail() {
   const { id } = useParams();
   const story = storyById(id);
+  useSeo(story ? storyMeta(story, authors[story.author]) : NOT_FOUND);
   if (!story) return <NotFound />;
   const au = authors[story.author];
   const related = [

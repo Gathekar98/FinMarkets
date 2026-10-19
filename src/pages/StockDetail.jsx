@@ -11,6 +11,8 @@ import WatchButton from '../components/ui/WatchButton';
 import { ScoreDots } from './Stocks';
 import { crore, num, price } from '../utils/format';
 import NotFound from './NotFound';
+import useSeo from '../seo/useSeo';
+import { stockMeta, NOT_FOUND } from '../seo/meta';
 
 const SECTIONS = [['overview', 'Overview'], ['scores', 'Scorecard'], ['financials', 'Financials'], ['shareholding', 'Shareholding'], ['peers', 'Peers']];
 
@@ -48,6 +50,7 @@ export default function StockDetail() {
   const { id } = useParams();
   const ticker = decodeURIComponent(id).toUpperCase();
   const { data: s, loading, error, reload } = useApi(`/api/stocks/${encodeURIComponent(ticker)}`, { refresh: LIVE });
+  useSeo(error?.message === 'Not found' ? NOT_FOUND : stockMeta(s ? { ...s, ticker: s.ticker } : { name: ticker, ticker }));
 
   if (error?.message === 'Not found') return <NotFound />;
   if (loading || !s) {
