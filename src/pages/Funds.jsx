@@ -1,0 +1,223 @@
+import { useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { funds, fundCategories, curatedLists, nfos } from '../data/funds';
+import { Change, PageHero, RiskBadge, SectionHead, Stars, Tabs } from '../components/ui/Bits';
+import { crore, num, pctPlain, rupee } from '../utils/format';
+
+const SORTS = {
+  '3y': (f) => f.ret['3y'],
+  '1y': (f) => f.ret['1y'],
+  '5y': (f) => f.ret['5y'],
+  aum: (f) => f.aum,
+  expense: (f) => -f.expense,
+  rating: (f) => f.rating,
+};
+
+function Screener() {
+  const [params, setParams] = useSearchParams();
+  const list = params.get('list') || '';
+  const [q, setQ] = useState('');
+  const [type, setType] = useState('All');
+  const [category, setCategory] = useState('All');
+  const [minRating, setMinRating] = useState(Number(params.get('rating')) || 0);
+  const [sort, setSort] = useState({ key: '3y', dir: -1 });
+
+  const categories = useMemo(() => ['All', ...new Set(funds.filter((f) => type === 'All' || f.type === type).map((f) => f.category))], [type]);
+
+  const rows = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return funds
+      .filter((f) => !list || f.tags.includes(list))
+      .filter((f) => type === 'All' || f.type === type)
+      .filter((f) => category === 'All' || f.category === category)
+      .filter((f) => f.rating >= minRating)
+      .filter((f) => !term || f.name.toLowerCase().includes(term) || f.amc.toLowerCase().includes(term))
+      .sort((a, b) => ((SORTS[sort.key](a) ?? -99) - (SORTS[sort.key](b) ?? -99)) * sort.dir);
+  }, [q, type, category, minRating, sort, list]);
+
+  const th = (key, label) => (
+    <th className="sortable r" onClick={() => setSort((s) => ({ key, dir: s.key === key ? -s.dir : -1 }))} aria-sort={sort.key === key ? (sort.dir < 0 ? 'descending' : 'ascending') : 'none'}>
+      {label} {sort.key === key ? (sort.dir < 0 ? '↓' : '↑') : ''}
+    </th>
+  );
+
+  const toggleList = (id) => {
+    const next = new URLSearchParams(params);
+    if (list === id) next.delete('list'); else next.set('list', id);
+    setParams(next, { replace: true });
+  };
+
+  return (
+    <>
+      <section className="section tight">
+        <div className="wrap">
+          <SectionHead eyebrow="Curated" title="Start from a shortlist" text="Hand-picked lists for common goals. Select one to filter the screener below." />
+          <div className="list-cards">
+            {curatedLists.map((c) => (
+              <button key={c.id} className={`list-card hover${list === c.id ? ' active' : ''}`} onClick={() => toggleList(c.id)} aria-pressed={list === c.id}>
+                <span className={`list-ico ${c.tone}`} aria-hidden>{c.icon}</span>
+                <strong style={{ fontSize: 17 }}>{c.title}</strong>
+                <span className="small muted">{c.blurb}</span>
+                <span className="xs" style={{ color: 'var(--brand)', fontWeight: 600 }}>{funds.filter((f) => f.tags.includes(c.id)).length} funds {list === c.id ? '· selected' : ''}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section tight" id="screener" style={{ scrollMarginTop: 110 }}>
+        <div className="wrap">
+          <SectionHead eyebrow="Fund screener" title="Find the right fund" />
+          <div className="card">
+            <div className="filters">
+              <div className="field grow">
+                <label htmlFor="fq">Search</label>
+                <input id="fq" className="input" placeholder="Fund or fund house" value={q} onChange={(e) => setQ(e.target.value)} />
+              </div>
+              <div className="field">
+                <label htmlFor="ft">Asset class</label>
+                <select id="ft" className="select" value={type} onChange={(e) => { setType(e.target.value); setCategory('All'); }}>
+                  {['All', 'Equity', 'Hybrid', 'Debt', 'Commodity'].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="fc">Category</label>
+                <select id="fc" className="select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                  {categories.map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="fr">Minimum rating</label>
+                <select id="fr" className="select" value={minRating} onChange={(e) => setMinRating(Number(e.target.value))}>
+                  <option value={0}>Any</option>
+                  {[3, 4, 5].map((r) => <option key={r} value={r}>{r}★ and above</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="result-count">
+              <span>{rows.length} funds{list ? ` in “${curatedLists.find((c) => c.id === list)?.title}”` : ''}</span>
+              <span>Returns are annualised for periods over 1 year · Direct plans</span>
+            </div>
+            <div className="table-wrap">
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th>Fund</th>
+                    <th className="sortable" onClick={() => setSort((s) => ({ key: 'rating', dir: s.key === 'rating' ? -s.dir : -1 }))}>Rating</th>
+                    <th>Risk</th>
+                    {th('1y', '1Y')}
+                    {th('3y', '3Y')}
+                    {th('5y', '5Y')}
+                    {th('expense', 'Expense')}
+                    {th('aum', 'AUM')}
+                    <th className="r">NAV</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((f) => (
+                    <tr key={f.id}>
+                      <td>
+                        <Link to={`/funds/${f.id}`} className="cell-title">{f.name}</Link>
+                        <div className="cell-sub">{f.category} · {f.amc}</div>
+                      </td>
+                      <td><Stars value={f.rating} /></td>
+                      <td><RiskBadge risk={f.risk} /></td>
+                      <td className="r num">{pctPlain(f.ret['1y'])}</td>
+                      <td className="r num" style={{ fontWeight: 600 }}>{pctPlain(f.ret['3y'])}</td>
+                      <td className="r num">{pctPlain(f.ret['5y'])}</td>
+                      <td className="r num">{f.expense.toFixed(2)}%</td>
+                      <td className="r num">{crore(f.aum)}</td>
+                      <td className="r">
+                        <div className="num">{num(f.nav)}</div>
+                        <Change value={f.navChg} arrow={false} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {rows.length === 0 && <div className="empty">No funds match these filters. Try lowering the minimum rating.</div>}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function CategoryMonitor() {
+  const [tab, setTab] = useState('Equity');
+  const rows = fundCategories[tab];
+  const max = Math.max(...Object.values(fundCategories).flat().map((c) => c.ret5y));
+  return (
+    <section className="section alt" id="categories" style={{ scrollMarginTop: 110 }}>
+      <div className="wrap">
+        <SectionHead eyebrow="Category monitor" title="How each category has done" text="Average annualised returns of all direct-plan funds in the category. The bar shows the 5-year figure." />
+        <div className="card">
+          <div style={{ padding: '0 12px' }}><Tabs options={Object.keys(fundCategories)} value={tab} onChange={setTab} /></div>
+          <div className="cat-bars">
+            <div className="cat-bar-row head"><span>Category</span><span>5Y return</span><span className="r">1Y</span><span className="r">3Y</span><span className="r">Funds</span></div>
+            {rows.map((c) => (
+              <div key={c.name} className="cat-bar-row">
+                <div>
+                  <div style={{ fontWeight: 600 }}>{c.name}</div>
+                  <div className="xs muted">AUM {crore(c.aum)}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="bar-track" style={{ flex: 1 }}><div className="bar-fill" style={{ width: `${(c.ret5y / max) * 100}%` }} /></div>
+                  <span className="num small" style={{ width: 52, textAlign: 'right', fontWeight: 600 }}>{pctPlain(c.ret5y)}</span>
+                </div>
+                <span className="num" style={{ textAlign: 'right' }}>{pctPlain(c.ret1y)}</span>
+                <span className="num" style={{ textAlign: 'right' }}>{pctPlain(c.ret3y)}</span>
+                <span className="num muted" style={{ textAlign: 'right' }}>{c.funds}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Nfos() {
+  return (
+    <section className="section" id="nfo" style={{ scrollMarginTop: 110 }}>
+      <div className="wrap">
+        <SectionHead eyebrow="New fund offers" title="Open and upcoming NFOs" text="A new fund has no track record. Read our checklist before you subscribe." link="/stories" linkLabel="NFO checklist" />
+        <div className="nfo-grid">
+          {nfos.map((n) => (
+            <div key={n.name} className="nfo card">
+              <span className="badge badge-accent" style={{ justifySelf: 'start' }}>{n.category}</span>
+              <h3 style={{ fontSize: 16 }}>{n.name}</h3>
+              <div className="xs muted">{n.amc}</div>
+              <div className="timeline"><span>Opens<br /><strong style={{ color: 'var(--ink)' }}>{n.opens}</strong></span><span style={{ textAlign: 'right' }}>Closes<br /><strong style={{ color: 'var(--ink)' }}>{n.closes}</strong></span></div>
+              <div className="small">Min. investment <strong className="num">{rupee(n.minInv)}</strong></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Funds() {
+  const fiveStar = funds.filter((f) => f.rating === 5).length;
+  return (
+    <>
+      <PageHero
+        crumbs={[{ label: 'Mutual Funds' }]}
+        eyebrow="Mutual funds"
+        title="Every fund, rated and ranked"
+        lead="Compare schemes on what actually matters — consistency, risk, cost and how they hold up in a falling market."
+      >
+        <div className="detail-meta" style={{ marginTop: 22 }}>
+          <span className="badge">{funds.length} funds in sample</span>
+          <span className="badge">{fiveStar} five-star</span>
+          <span className="badge">Updated daily after NAVs</span>
+        </div>
+      </PageHero>
+      <Screener />
+      <CategoryMonitor />
+      <Nfos />
+    </>
+  );
+}

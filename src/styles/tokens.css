@@ -1,0 +1,95 @@
+/* Design tokens — light theme by default, dark via [data-theme="dark"] or system preference */
+:root {
+  --paper: #f6f4ee;
+  --surface: #ffffff;
+  --surface-2: #f0ede4;
+  --ink: #0f1b2d;
+  --ink-2: #3e4a60;
+  --muted: #758097;
+  --line: #e3dfd3;
+  --line-strong: #cfc9b8;
+
+  --brand: #0f5c4d;
+  --brand-ink: #ffffff;
+  --brand-soft: #e1efe9;
+  --accent: #e39b2d;
+  --accent-soft: #fbefd9;
+  --navy: #0f1b2d;
+  --navy-2: #182a44;
+
+  --up: #11804a;
+  --up-soft: #e2f3e9;
+  --down: #c63a2f;
+  --down-soft: #fbe7e4;
+
+  --chart-1: #0f5c4d;
+  --chart-2: #e39b2d;
+  --chart-3: #3b6fb6;
+  --chart-4: #9a5bb5;
+  --chart-5: #c96a4a;
+  --chart-6: #7a8a99;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-num: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
+  --r-sm: 6px;
+  --r: 12px;
+  --r-lg: 20px;
+  --shadow: 0 1px 2px rgba(15, 27, 45, 0.04), 0 4px 16px rgba(15, 27, 45, 0.06);
+  --shadow-lg: 0 12px 40px rgba(15, 27, 45, 0.14);
+  --wrap: 1240px;
+  --gutter: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0c1420;
+    --surface: #131e2e;
+    --surface-2: #1a2738;
+    --ink: #eef1f6;
+    --ink-2: #b9c2d2;
+    --muted: #8591a7;
+    --line: #243349;
+    --line-strong: #33465f;
+    --brand: #3fb594;
+    --brand-ink: #062019;
+    --brand-soft: #133a32;
+    --accent: #f2b544;
+    --accent-soft: #3a2d14;
+    --navy: #070d16;
+    --navy-2: #0f1a29;
+    --up: #3ec27c;
+    --up-soft: #12342a;
+    --down: #ff6e61;
+    --down-soft: #3d1c1a;
+    --chart-1: #3fb594;
+    --chart-3: #6d9ce0;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0c1420;
+  --surface: #131e2e;
+  --surface-2: #1a2738;
+  --ink: #eef1f6;
+  --ink-2: #b9c2d2;
+  --muted: #8591a7;
+  --line: #243349;
+  --line-strong: #33465f;
+  --brand: #3fb594;
+  --brand-ink: #062019;
+  --brand-soft: #133a32;
+  --accent: #f2b544;
+  --accent-soft: #3a2d14;
+  --navy: #070d16;
+  --navy-2: #0f1a29;
+  --up: #3ec27c;
+  --up-soft: #12342a;
+  --down: #ff6e61;
+  --down-soft: #3d1c1a;
+  --chart-1: #3fb594;
+  --chart-3: #6d9ce0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
