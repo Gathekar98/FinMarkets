@@ -14,10 +14,20 @@ const parseDate = (s) => {
   return new Date(Number(yyyy), m >= 0 ? m : Number(mon) - 1, Number(dd));
 };
 
-async function fetchText(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 finMarkets' } });
-  if (!r.ok) throw new Error(`AMFI ${r.status}`);
-  return r.text();
+/** AMFI's portal is occasionally slow or drops a request; retry with a per-attempt timeout. */
+async function fetchText(url, attempts = 3) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 finMarkets' }, signal: AbortSignal.timeout(15000) });
+      if (!r.ok) throw new Error(`AMFI ${r.status}`);
+      return await r.text();
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts - 1) await new Promise((res) => setTimeout(res, 500 * (i + 1)));
+    }
+  }
+  throw lastErr;
 }
 
 /** Maps an AMFI section header to { type, category }. Returns null for schemes we skip (ETFs, closed-ended…). */
