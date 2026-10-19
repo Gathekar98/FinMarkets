@@ -196,7 +196,7 @@ export default function Stocks() {
       >
         <div className="detail-actions" style={{ alignItems: 'center' }}>
           <LiveBadge state={ov?.marketState} time={data?.asOf} />
-          {data?.asOf && <span className="xs" style={{ color: '#8796ad' }}>Updated {timeLabel(data.asOf)}</span>}
+          {data?.asOf && <span className="xs" style={{ color: 'var(--muted)' }}>Updated {timeLabel(data.asOf)}</span>}
           <Link to="/ipo" className="btn">IPO Monitor</Link>
           <Link to="/pricing#stocks" className="btn btn-accent">Get Stock Advisor</Link>
         </div>

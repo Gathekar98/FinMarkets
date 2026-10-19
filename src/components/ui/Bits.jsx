@@ -84,7 +84,7 @@ export function PageHero({ crumbs = [], eyebrow, title, lead, children }) {
             {crumbs.map((c) => (
               <span key={c.label} style={{ display: 'contents' }}>
                 <span aria-hidden>/</span>
-                {c.to ? <Link to={c.to}>{c.label}</Link> : <span style={{ color: '#cfd8e6' }}>{c.label}</span>}
+                {c.to ? <Link to={c.to}>{c.label}</Link> : <span className="here">{c.label}</span>}
               </span>
             ))}
           </nav>

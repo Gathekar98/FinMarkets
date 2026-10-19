@@ -6,7 +6,7 @@ import { plans, ratingScale } from '../data/plans';
 import { useApi, LIVE, timeLabel } from '../api/client';
 import { Change, Chips, SectionHead, Stars, Tabs } from '../components/ui/Bits';
 import Sparkline from '../components/ui/Sparkline';
-import StoryCard from '../components/ui/StoryCard';
+import StoryCard, { Byline, StoryArt } from '../components/ui/StoryCard';
 import { ScoreRing } from '../components/ui/Gauges';
 import { LiveBadge, Skeleton, SkeletonRows } from '../components/ui/Status';
 import { num, pctPlain, rupee } from '../utils/format';
@@ -128,29 +128,33 @@ function TopStories() {
   return (
     <section className="section">
       <div className="wrap">
-        <SectionHead eyebrow="Research desk" title="Today's top stories" link={`/stories${cat === 'Latest' ? '' : `?c=${cat}`}`} linkLabel="More stories" />
-        <div style={{ marginBottom: 24 }}>
-          <Chips options={storyCategories} value={cat} onChange={setCat} />
+        <SectionHead eyebrow="Research desk" title="Today's top stories" link={`/stories${cat === 'Latest' ? '' : `?c=${cat}`}`} linkLabel="All stories" />
+        <div style={{ marginBottom: 28 }}>
+          <Tabs options={storyCategories} value={cat} onChange={setCat} />
         </div>
         {!lead ? (
           <div className="card empty">No stories in this section yet.</div>
         ) : (
-          <div className="mag-grid">
-            <div className="mag-lead"><StoryCard story={lead} variant="lead" /></div>
-            <div className="mag-mid">
-              {rest.slice(0, 2).map((s) => <StoryCard key={s.id} story={s} />)}
+          <div className="home-stories">
+            <div>
+              <Link to={`/stories/${lead.id}`} className="story-card">
+                <StoryArt story={lead} />
+                <div className="story-card-text">
+                  <span className="story-cat">{lead.category}</span>
+                  <h3 className="story-title">{lead.title}</h3>
+                  <p className="story-dek">{lead.dek}</p>
+                  <Byline story={lead} avatar />
+                </div>
+              </Link>
             </div>
-            <aside className="mag-side">
-              <h4 className="side-title">Most read this week</h4>
+            <div className="col-list">
+              {rest.slice(0, 4).map((s) => <StoryCard key={s.id} story={s} variant="row" />)}
+              {rest.length === 0 && <p className="small muted">More stories in this section soon.</p>}
+            </div>
+            <aside className="side-box">
+              <div className="side-title">Most read this week</div>
               <ol className="ranked">
-                {mostRead.map((s) => (
-                  <li key={s.id}>
-                    <Link to={`/stories/${s.id}`}>
-                      <span className="eyebrow" style={{ fontSize: 10 }}>{s.category}</span>
-                      <span className="ranked-title">{s.title}</span>
-                    </Link>
-                  </li>
-                ))}
+                {mostRead.map((s) => <li key={s.id}><StoryCard story={s} variant="mini" /></li>)}
               </ol>
             </aside>
           </div>

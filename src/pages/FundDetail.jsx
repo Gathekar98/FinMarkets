@@ -88,7 +88,7 @@ export default function FundDetail() {
             </div>
           </div>
           <div className="detail-price">
-            <div className="xs" style={{ color: '#8796ad' }}>NAV as on {f.date}</div>
+            <div className="xs" style={{ color: 'var(--muted)' }}>NAV as on {f.date}</div>
             <div className="big">₹{num(f.nav, 4)}</div>
             {f.ret['1d'] != null && <Change value={f.ret['1d']} pill />}
           </div>

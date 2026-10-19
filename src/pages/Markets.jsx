@@ -30,7 +30,7 @@ export default function Markets() {
       <PageHero crumbs={[{ label: 'Market Watch' }]} eyebrow="Market watch" title="The market, at a glance" lead="Indian and global indices, sector moves, market breadth and commodities — refreshed every minute.">
         <div className="detail-actions" style={{ alignItems: 'center' }}>
           <LiveBadge state={data.marketState} time={data.asOf} />
-          <span className="xs" style={{ color: '#8796ad' }}>Updated {timeLabel(data.asOf)}</span>
+          <span className="xs" style={{ color: 'var(--muted)' }}>Updated {timeLabel(data.asOf)}</span>
         </div>
       </PageHero>
 

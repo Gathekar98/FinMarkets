@@ -88,10 +88,10 @@ export default function StockDetail() {
             </div>
           </div>
           <div className="detail-price">
-            <div className="xs" style={{ color: '#8796ad' }}>{s.time ? `As of ${timeLabel(s.time)}` : 'Last price'}</div>
+            <div className="xs" style={{ color: 'var(--muted)' }}>{s.time ? `As of ${timeLabel(s.time)}` : 'Last price'}</div>
             <div className="big">₹{price(s.price)}</div>
             <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-              <span className="num" style={{ color: s.change >= 0 ? '#4fd18b' : '#ff7b6e' }}>{s.change >= 0 ? '+' : ''}{num(s.change)}</span>
+              <span className={`num ${s.change >= 0 ? 'up' : 'down'}`}>{s.change >= 0 ? '+' : ''}{num(s.change)}</span>
               <Change value={s.changePct} pill />
             </span>
           </div>
@@ -237,7 +237,7 @@ export default function StockDetail() {
             )}
             <div className="card card-pad">
               <h3 style={{ marginBottom: 8 }}>Related analysis</h3>
-              {related.map((r) => <StoryCard key={r.id} story={r} variant="row" />)}
+              {related.map((r) => <StoryCard key={r.id} story={r} variant="mini" />)}
             </div>
           </aside>
         </div>

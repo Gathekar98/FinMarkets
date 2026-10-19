@@ -1,17 +1,17 @@
 /* Design tokens — light theme by default, dark via [data-theme="dark"] or system preference */
 :root {
-  --paper: #f6f4ee;
+  --paper: #f7f7f4;
   --surface: #ffffff;
-  --surface-2: #f0ede4;
-  --ink: #0f1b2d;
-  --ink-2: #3e4a60;
-  --muted: #758097;
-  --line: #e3dfd3;
-  --line-strong: #cfc9b8;
+  --surface-2: #f1f1ec;
+  --ink: #111a2b;
+  --ink-2: #414b5e;
+  --muted: #737d90;
+  --line: #e6e5df;
+  --line-strong: #d3d1c8;
 
-  --brand: #0f5c4d;
+  --brand: #0d6b56;
   --brand-ink: #ffffff;
-  --brand-soft: #e1efe9;
+  --brand-soft: #e3f1ec;
   --accent: #e39b2d;
   --accent-soft: #fbefd9;
   --navy: #0f1b2d;
@@ -22,7 +22,7 @@
   --down: #c63a2f;
   --down-soft: #fbe7e4;
 
-  --chart-1: #0f5c4d;
+  --chart-1: #0d6b56;
   --chart-2: #e39b2d;
   --chart-3: #3b6fb6;
   --chart-4: #9a5bb5;
@@ -33,11 +33,11 @@
   --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-num: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 
-  --r-sm: 6px;
-  --r: 12px;
-  --r-lg: 20px;
-  --shadow: 0 1px 2px rgba(15, 27, 45, 0.04), 0 4px 16px rgba(15, 27, 45, 0.06);
-  --shadow-lg: 0 12px 40px rgba(15, 27, 45, 0.14);
+  --r-sm: 8px;
+  --r: 14px;
+  --r-lg: 22px;
+  --shadow: 0 1px 2px rgba(17, 26, 43, 0.04), 0 2px 8px rgba(17, 26, 43, 0.04);
+  --shadow-lg: 0 10px 30px rgba(17, 26, 43, 0.10);
   --wrap: 1240px;
   --gutter: 24px;
 }

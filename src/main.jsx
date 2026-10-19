@@ -7,6 +7,7 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/layout.css';
 import './styles/pages.css';
+import './styles/stories.css';
 
 try {
   const saved = localStorage.getItem('fm-theme');
