@@ -164,3 +164,29 @@
 .story-row:first-child { padding-top: 0; }
 .story-row h3 { font-family: var(--font-display); font-weight: 600; font-size: 17px; line-height: 1.35; margin: 4px 0 6px; }
 .story-row:hover h3 { color: var(--brand); }
+
+/* ---------- User menu ---------- */
+.user-menu { position: relative; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--brand); color: var(--brand-ink); font-weight: 700; font-size: 13px; }
+.user-pop { position: absolute; right: 0; top: calc(100% + 8px); min-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-lg); padding: 6px; z-index: 5; display: grid; }
+.user-pop-head { padding: 10px 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; display: grid; }
+.user-pop a, .user-pop button { text-align: left; padding: 9px 12px; border-radius: 8px; border: 0; background: none; font-size: 14px; }
+.user-pop a:hover, .user-pop button:hover { background: var(--surface-2); }
+
+/* ---------- Auth pages ---------- */
+.auth-wrap { min-height: calc(100vh - 200px); display: grid; grid-template-columns: 1fr 1fr; }
+.auth-side { background: var(--navy); color: #c9d3e3; padding: 56px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+.auth-side h2 { color: #fff; font-size: clamp(26px, 3vw, 38px); }
+.auth-side ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.auth-side li { display: flex; gap: 10px; }
+.auth-side li::before { content: '✓'; color: var(--accent); font-weight: 800; }
+.auth-main { display: grid; place-items: center; padding: 48px 24px; }
+.auth-card { width: 100%; max-width: 420px; display: grid; gap: 16px; }
+.auth-card h1 { font-size: 32px; }
+.auth-card form { display: grid; gap: 14px; }
+.auth-or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+.auth-or::before, .auth-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.form-msg { padding: 10px 14px; border-radius: var(--r-sm); font-size: 14px; }
+.form-msg.err { background: var(--down-soft); color: var(--down); }
+.form-msg.ok { background: var(--up-soft); color: var(--up); }
+@media (max-width: 860px) { .auth-wrap { grid-template-columns: 1fr; } .auth-side { display: none; } }

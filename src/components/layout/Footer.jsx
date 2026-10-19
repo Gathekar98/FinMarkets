@@ -37,8 +37,7 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <p>
-            <strong>Prototype notice:</strong> all prices, ratings, fund and company names on this site are illustrative sample data, not live
-            market information. Nothing here is investment advice. Mutual fund investments are subject to market risks; read all scheme-related documents carefully.
+            <strong>Data sources:</strong> mutual fund NAVs from AMFI (updated each evening); stock and index prices are delayed by up to 15 minutes. Ratings and scores are our own calculations and are not investment advice. Mutual fund investments are subject to market risks; read all scheme-related documents carefully.
           </p>
           <p>© 2026 finMarkets. All rights reserved.</p>
         </div>

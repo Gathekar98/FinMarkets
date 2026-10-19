@@ -2,21 +2,24 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { investorTypes, podcasts, videos, guides } from '../data/learn';
 import { stories, storyCategories, askQuestions } from '../data/stories';
-import { indianIndices, globalIndices, commodities, sectors, breadth, asOf } from '../data/markets';
-import { funds } from '../data/funds';
 import { plans, ratingScale } from '../data/plans';
+import { useApi, LIVE, timeLabel } from '../api/client';
 import { Change, Chips, SectionHead, Stars, Tabs } from '../components/ui/Bits';
 import Sparkline from '../components/ui/Sparkline';
 import StoryCard from '../components/ui/StoryCard';
 import { ScoreRing } from '../components/ui/Gauges';
+import { LiveBadge, Skeleton, SkeletonRows } from '../components/ui/Status';
 import { num, pctPlain, rupee } from '../utils/format';
-import { spark } from '../utils/series';
 
 function Hero() {
   const [type, setType] = useState(investorTypes[0].id);
   const active = investorTypes.find((t) => t.id === type);
-  const nifty = indianIndices[1];
-  const total = breadth.advances + breadth.declines + breadth.unchanged;
+  const { data: ov } = useApi('/api/market/overview', { refresh: LIVE });
+  const { data: intraday } = useApi('/api/market/chart/%5ENSEI?range=1D', { refresh: LIVE });
+  const nifty = ov?.indian.find((i) => i.symbol === '^NSEI');
+  const b = ov?.breadth;
+  const total = b ? b.advances + b.declines + b.unchanged || 1 : 1;
+  const side = ov ? ['^BSESN', 'NIFTY_MIDCAP_100.NS', '^CNXSC'].map((s) => ov.indian.find((i) => i.symbol === s)).concat(ov.global.find((g) => g.symbol === '^GSPC')).filter(Boolean) : [];
 
   return (
     <section className="home-hero">
@@ -49,32 +52,38 @@ function Hero() {
         <aside className="pulse card" aria-label="Market pulse">
           <div className="pulse-head">
             <div>
-              <div className="xs muted">Market pulse · {asOf}</div>
-              <div className="pulse-name">{nifty.name}</div>
+              <div className="xs muted">Market pulse{ov ? ` · ${timeLabel(ov.asOf)}` : ''}</div>
+              <div className="pulse-name">Nifty 50</div>
             </div>
-            <span className="badge">Sample data</span>
+            <LiveBadge state={ov?.marketState} time={ov?.asOf} />
           </div>
-          <div className="pulse-value">
-            <span className="num">{num(nifty.value)}</span>
-            <Change value={nifty.changePct} pill />
-          </div>
+          {!nifty ? <Skeleton h={40} w="70%" /> : (
+            <div className="pulse-value">
+              <span className="num">{num(nifty.value)}</span>
+              <Change value={nifty.changePct} pill />
+            </div>
+          )}
           <div className="pulse-chart">
-            <Sparkline data={spark('nifty-hero', nifty.value, nifty.changePct > 0)} width={360} height={90} up={nifty.changePct > 0} />
+            {intraday?.length > 1 ? (
+              <Sparkline data={intraday.map((p) => p.v)} width={360} height={90} up={intraday.at(-1).v >= intraday[0].v} />
+            ) : <Skeleton h={90} />}
           </div>
-          <div className="pulse-breadth">
-            <div className="xs muted" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="up">{breadth.advances} advances</span>
-              <span className="down">{breadth.declines} declines</span>
+          {b && (
+            <div className="pulse-breadth">
+              <div className="xs muted" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span className="up">{b.advances} advancing</span>
+                <span className="down">{b.declines} declining</span>
+              </div>
+              <div className="breadth-bar">
+                <span style={{ width: `${(b.advances / total) * 100}%`, background: 'var(--up)' }} />
+                <span style={{ width: `${(b.unchanged / total) * 100}%`, background: 'var(--line-strong)' }} />
+                <span style={{ width: `${(b.declines / total) * 100}%`, background: 'var(--down)' }} />
+              </div>
             </div>
-            <div className="breadth-bar">
-              <span style={{ width: `${(breadth.advances / total) * 100}%`, background: 'var(--up)' }} />
-              <span style={{ width: `${(breadth.unchanged / total) * 100}%`, background: 'var(--line-strong)' }} />
-              <span style={{ width: `${(breadth.declines / total) * 100}%`, background: 'var(--down)' }} />
-            </div>
-          </div>
+          )}
           <div className="pulse-list">
-            {[indianIndices[0], indianIndices[4], indianIndices[5], globalIndices[1]].map((i) => (
-              <div key={i.id}>
+            {side.length === 0 ? <SkeletonRows rows={4} h={20} /> : side.map((i) => (
+              <div key={i.symbol}>
                 <span>{i.name}</span>
                 <span className="num">{num(i.value)}</span>
                 <Change value={i.changePct} arrow={false} />
@@ -153,45 +162,48 @@ function TopStories() {
 
 function MarketSnapshot() {
   const [tab, setTab] = useState('India');
-  const data = tab === 'India' ? indianIndices : tab === 'Global' ? globalIndices : commodities;
-  const maxAbs = Math.max(...sectors.map((s) => Math.abs(s.changePct)));
+  const { data: ov } = useApi('/api/market/overview', { refresh: LIVE });
+  const data = !ov ? [] : tab === 'India' ? ov.indian : tab === 'Global' ? ov.global : ov.commodities;
+  const sectors = ov?.sectors || [];
+  const maxAbs = Math.max(0.5, ...sectors.map((s) => Math.abs(s.changePct)));
 
   return (
     <section className="section alt">
       <div className="wrap">
-        <SectionHead eyebrow="Markets" title="Where the market stands" text={`Index levels and sector moves at the close · ${asOf}`} link="/markets" linkLabel="Full market watch" />
+        <SectionHead eyebrow="Markets" title="Where the market stands" text={ov ? `Live index levels and sector moves · updated ${timeLabel(ov.asOf)}` : 'Loading live prices…'} link="/markets" linkLabel="Full market watch" />
         <div className="snapshot">
           <div className="card">
             <div style={{ padding: '0 12px' }}><Tabs options={['India', 'Global', 'Commodities']} value={tab} onChange={setTab} /></div>
-            <div className="index-tiles">
-              {data.map((x) => (
-                <div key={x.id} className="index-tile">
-                  <div className="small" style={{ fontWeight: 600 }}>{x.name}</div>
-                  {x.region && <div className="xs muted">{x.region}</div>}
-                  <div className="num" style={{ fontSize: 18, fontWeight: 600, marginTop: 6 }}>{x.unit === '$' ? '$' : ''}{num(x.value)}</div>
-                  <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'space-between', gap: 8 }}>
+            {!ov ? <SkeletonRows rows={4} /> : (
+              <div className="index-tiles">
+                {data.map((x) => (
+                  <Link key={x.symbol} to="/markets" className="index-tile">
+                    <div className="small" style={{ fontWeight: 600 }}>{x.name}</div>
+                    <div className="xs muted">{x.region || (tab === 'India' ? 'NSE / BSE' : '')}</div>
+                    <div className="num" style={{ fontSize: 18, fontWeight: 600, marginTop: 6 }}>{x.unit === '$' ? '$' : x.unit === '₹' ? '₹' : ''}{num(x.value, x.value > 10000 ? 0 : 2)}</div>
                     <Change value={x.changePct} />
-                    <Sparkline data={spark(x.id, x.value, x.changePct > 0)} width={70} height={26} up={x.changePct > 0} fill={false} />
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           <div className="card card-pad">
             <h3 style={{ marginBottom: 4 }}>Sector heat</h3>
-            <p className="xs muted" style={{ marginBottom: 14 }}>Today's move by sector, Nifty 500 universe</p>
-            <div className="heat">
-              {[...sectors].sort((a, b) => b.changePct - a.changePct).map((s) => {
-                const a = Math.abs(s.changePct) / maxAbs;
-                const bg = s.changePct >= 0 ? `rgba(17,128,74,${0.15 + a * 0.75})` : `rgba(198,58,47,${0.15 + a * 0.75})`;
-                return (
-                  <div key={s.name} className="heat-cell" style={{ background: bg, color: a > 0.45 ? '#fff' : 'var(--ink)' }}>
-                    <span>{s.name}</span>
-                    <strong className="num">{s.changePct > 0 ? '+' : ''}{s.changePct.toFixed(2)}%</strong>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="xs muted" style={{ marginBottom: 14 }}>Today's move in NSE sectoral indices</p>
+            {!ov ? <SkeletonRows rows={4} /> : (
+              <div className="heat">
+                {[...sectors].sort((a, b) => b.changePct - a.changePct).map((s) => {
+                  const a = Math.abs(s.changePct) / maxAbs;
+                  const bg = s.changePct >= 0 ? `rgba(17,128,74,${0.15 + a * 0.75})` : `rgba(198,58,47,${0.15 + a * 0.75})`;
+                  return (
+                    <div key={s.symbol} className="heat-cell" style={{ background: bg, color: a > 0.45 ? '#fff' : 'var(--ink)' }}>
+                      <span>{s.name}</span>
+                      <strong className="num">{s.changePct > 0 ? '+' : ''}{s.changePct.toFixed(2)}%</strong>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -201,32 +213,34 @@ function MarketSnapshot() {
 
 function TopFunds() {
   const [type, setType] = useState('Equity');
-  const list = funds.filter((f) => f.type === type && f.rating >= 4).sort((a, b) => b.ret['3y'] - a.ret['3y']).slice(0, 6);
+  const { data } = useApi(`/api/funds?type=${type}&minRating=5&sort=3y&limit=6`);
   return (
     <section className="section">
       <div className="wrap">
-        <SectionHead eyebrow="Fund ratings" title="Highest-rated funds right now" text="Ranked on risk-adjusted returns versus their category over 3 and 5 years." link="/funds" linkLabel="Open fund screener" />
-        <div style={{ marginBottom: 20 }}><Chips options={['Equity', 'Hybrid', 'Debt']} value={type} onChange={setType} /></div>
-        <div className="fund-cards">
-          {list.map((f) => (
-            <Link key={f.id} to={`/funds/${f.id}`} className="fund-card card hover">
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <span className="badge badge-brand">{f.category}</span>
-                <Stars value={f.rating} />
-              </div>
-              <h3>{f.name}</h3>
-              <div className="fund-card-rets">
-                {['1y', '3y', '5y'].map((k) => (
-                  <div key={k}>
-                    <div className="xs muted">{k.toUpperCase()} return</div>
-                    <div className={`num ${f.ret[k] >= f.cat[k] ? 'up' : ''}`} style={{ fontWeight: 600 }}>{pctPlain(f.ret[k])}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="xs muted">vs category 3Y {pctPlain(f.cat['3y'])} · Expense {f.expense}%</div>
-            </Link>
-          ))}
-        </div>
+        <SectionHead eyebrow="Fund ratings" title="Highest-rated funds right now" text={`5★ funds with the best 3-year returns, ranked against their own category${data ? ` · NAV ${data.asOf}` : ''}.`} link="/funds" linkLabel="Open fund screener" />
+        <div style={{ marginBottom: 20 }}><Chips options={['Equity', 'Hybrid', 'Debt', 'Index']} value={type} onChange={setType} /></div>
+        {!data ? <SkeletonRows rows={3} h={120} /> : (
+          <div className="fund-cards">
+            {data.rows.map((f) => (
+              <Link key={f.code} to={`/funds/${f.code}`} className="fund-card card hover">
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                  <span className="badge badge-brand">{f.category}</span>
+                  <Stars value={f.rating} />
+                </div>
+                <h3>{f.name}</h3>
+                <div className="fund-card-rets">
+                  {['1y', '3y', '5y'].map((k) => (
+                    <div key={k}>
+                      <div className="xs muted">{k.toUpperCase()} return</div>
+                      <div className={`num ${f.ret[k] != null && f.catRet?.[k] != null && f.ret[k] >= f.catRet[k] ? 'up' : ''}`} style={{ fontWeight: 600 }}>{pctPlain(f.ret[k])}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="xs muted">vs category 3Y {pctPlain(f.catRet?.['3y'])} · {f.amc}</div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -270,6 +284,8 @@ function ToolsBento() {
 }
 
 function RatingsExplained() {
+  const { data } = useApi('/api/stocks');
+  const best = data?.rows.filter((s) => s.scores?.quality != null).sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.marketCap || 0) - (a.marketCap || 0))[0];
   return (
     <section className="section">
       <div className="wrap ratings-grid">
@@ -277,8 +293,8 @@ function RatingsExplained() {
           <span className="eyebrow">Our ratings</span>
           <h2 style={{ marginTop: 6 }}>Two systems, one goal: fewer bad decisions</h2>
           <p className="muted" style={{ marginTop: 10 }}>
-            Fund ratings compare each scheme with its peers on risk-adjusted returns. Stock scores rate a business on four independent
-            dimensions, so you can see what you are paying for — and what you are not.
+            Fund ratings rank each scheme against its own category on 3- and 5-year returns, recalculated every evening. Stock scores rate a business on four
+            independent dimensions from its latest financials and live price, so you can see what you are paying for — and what you are not.
           </p>
           <div className="scale card">
             {ratingScale.map((r) => (
@@ -291,16 +307,15 @@ function RatingsExplained() {
           </div>
         </div>
         <div className="card card-pad">
-          <div className="xs muted">Example · Indus Digital Services</div>
+          <div className="xs muted">Live example · {best ? best.name : 'loading…'}</div>
           <h3 style={{ margin: '4px 0 18px' }}>Stock scorecard</h3>
-          <div className="grid-4" style={{ gap: 12 }}>
-            <ScoreRing label="Quality" value={10} />
-            <ScoreRing label="Growth" value={6} />
-            <ScoreRing label="Valuation" value={5} />
-            <ScoreRing label="Momentum" value={7} />
-          </div>
-          <div className="note" style={{ marginTop: 18 }}>Scores run from 0 to 10 and are refreshed after every quarterly result and weekly for momentum.</div>
-          <Link to="/stocks/indus-digital" className="link-arrow" style={{ marginTop: 14 }}>See the full stock report →</Link>
+          {!best ? <SkeletonRows rows={2} h={80} /> : (
+            <div className="grid-4" style={{ gap: 12 }}>
+              {Object.entries(best.scores).map(([k, v]) => <ScoreRing key={k} label={k[0].toUpperCase() + k.slice(1)} value={v ?? 0} />)}
+            </div>
+          )}
+          <div className="note" style={{ marginTop: 18 }}>Scores run from 0 to 10 relative to ~100 large NSE companies. Fundamentals refresh twice a day; momentum moves with the price.</div>
+          {best && <Link to={`/stocks/${best.ticker}`} className="link-arrow" style={{ marginTop: 14 }}>See the full stock report →</Link>}
         </div>
       </div>
     </section>

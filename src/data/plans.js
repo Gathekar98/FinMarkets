@@ -33,7 +33,7 @@ export const plans = [
 ];
 
 export const ratingScale = [
-  { stars: 5, label: 'Top 10%', text: 'Best risk-adjusted returns in the category' },
+  { stars: 5, label: 'Top 10%', text: 'Best 3Y and 5Y returns in its category' },
   { stars: 4, label: 'Next 22.5%', text: 'Consistently above average' },
   { stars: 3, label: 'Middle 35%', text: 'In line with the category' },
   { stars: 2, label: 'Next 22.5%', text: 'Below average' },

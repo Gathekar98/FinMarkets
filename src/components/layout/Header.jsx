@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { navItems } from './nav';
-import { indianIndices, globalIndices, commodities } from '../../data/markets';
-import { funds } from '../../data/funds';
-import { stocks } from '../../data/stocks';
 import { num } from '../../utils/format';
+import { api, useApi, LIVE } from '../../api/client';
+import { useAuth } from '../../auth/AuthContext';
 
 function Logo() {
   return (
@@ -19,24 +18,22 @@ function Logo() {
 }
 
 function TickerTape() {
-  const items = [...indianIndices.slice(0, 6), ...globalIndices.slice(0, 4), ...commodities].map((x) => ({
-    name: x.name,
-    value: x.value,
-    pct: x.changePct,
-  }));
+  const { data } = useApi('/api/market/overview', { refresh: LIVE });
+  if (!data) return <div className="ticker" style={{ height: 33 }} aria-hidden />;
+  const items = [...data.indian.slice(0, 6), ...data.global.slice(0, 4), ...data.commodities];
   const row = (
     <>
       {items.map((x) => (
-        <span className="tick" key={x.name}>
+        <span className="tick" key={x.symbol}>
           <span className="tick-name">{x.name}</span>
           <span className="num">{num(x.value)}</span>
-          <span className={`num ${x.pct >= 0 ? 'up' : 'down'}`}>{x.pct >= 0 ? '▲' : '▼'} {Math.abs(x.pct).toFixed(2)}%</span>
+          <span className={`num ${x.changePct >= 0 ? 'up' : 'down'}`}>{x.changePct >= 0 ? '▲' : '▼'} {Math.abs(x.changePct).toFixed(2)}%</span>
         </span>
       ))}
     </>
   );
   return (
-    <div className="ticker" aria-label="Market ticker (sample data)">
+    <div className="ticker" aria-label="Market ticker, 15 minutes delayed">
       <div className="ticker-track">
         {row}
         {row}
@@ -48,13 +45,23 @@ function TickerTape() {
 function Search() {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
+  const [results, setResults] = useState([]);
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const ref = useRef(null);
-  const term = q.trim().toLowerCase();
-  const results = term.length < 2 ? [] : [
-    ...funds.filter((f) => f.name.toLowerCase().includes(term)).slice(0, 4).map((f) => ({ type: 'Fund', label: f.name, sub: f.category, to: `/funds/${f.id}` })),
-    ...stocks.filter((s) => s.name.toLowerCase().includes(term) || s.ticker.toLowerCase().includes(term)).slice(0, 4).map((s) => ({ type: 'Stock', label: s.name, sub: s.ticker, to: `/stocks/${s.id}` })),
-  ];
+  const term = q.trim();
+
+  useEffect(() => {
+    if (term.length < 2) { setResults([]); return undefined; }
+    setBusy(true);
+    const t = setTimeout(() => {
+      api(`/api/search?q=${encodeURIComponent(term)}`)
+        .then(setResults)
+        .catch(() => setResults([]))
+        .finally(() => setBusy(false));
+    }, 250);
+    return () => clearTimeout(t);
+  }, [term]);
 
   useEffect(() => {
     const close = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
@@ -62,7 +69,8 @@ function Search() {
     return () => document.removeEventListener('mousedown', close);
   }, []);
 
-  const go = (to) => { setQ(''); setOpen(false); navigate(to); };
+  const to = (r) => (r.type === 'Fund' ? `/funds/${r.id}` : `/stocks/${r.id}`);
+  const go = (r) => { setQ(''); setOpen(false); navigate(to(r)); };
 
   return (
     <div className="search" ref={ref}>
@@ -71,15 +79,16 @@ function Search() {
         value={q}
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
-        onKeyDown={(e) => e.key === 'Enter' && results[0] && go(results[0].to)}
-        placeholder="Search funds, stocks…"
-        aria-label="Search funds and stocks"
+        onKeyDown={(e) => e.key === 'Enter' && results[0] && go(results[0])}
+        placeholder="Search any stock or fund…"
+        aria-label="Search stocks and mutual funds"
       />
       {open && term.length >= 2 && (
         <div className="search-pop">
-          {results.length === 0 && <div className="empty small">No matches for “{q}”</div>}
+          {busy && results.length === 0 && <div className="empty small">Searching…</div>}
+          {!busy && results.length === 0 && <div className="empty small">No matches for “{q}”</div>}
           {results.map((r) => (
-            <button key={r.to} onClick={() => go(r.to)}>
+            <button key={`${r.type}-${r.id}`} onClick={() => go(r)}>
               <span className={`badge ${r.type === 'Fund' ? 'badge-brand' : 'badge-accent'}`}>{r.type}</span>
               <span style={{ flex: 1, textAlign: 'left' }}>
                 <span style={{ display: 'block', fontWeight: 600 }}>{r.label}</span>
@@ -90,6 +99,57 @@ function Search() {
         </div>
       )}
     </div>
+  );
+}
+
+function UserMenu() {
+  const { user, displayName, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const close = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
+
+  if (!user) return <Link to="/login" className="btn btn-sm hide-sm">Sign in</Link>;
+
+  const initials = displayName.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  return (
+    <div className="user-menu" ref={ref}>
+      <button className="avatar" onClick={() => setOpen((o) => !o)} aria-label="Account menu" aria-expanded={open}>{initials}</button>
+      {open && (
+        <div className="user-pop" role="menu">
+          <div className="user-pop-head">
+            <strong>{displayName}</strong>
+            <span className="xs muted">{user.email}</span>
+          </div>
+          <Link to="/portfolio" role="menuitem" onClick={() => setOpen(false)}>My portfolio</Link>
+          <Link to="/account#watchlist" role="menuitem" onClick={() => setOpen(false)}>Watchlist</Link>
+          <Link to="/account" role="menuitem" onClick={() => setOpen(false)}>Account settings</Link>
+          <button role="menuitem" onClick={async () => { setOpen(false); await signOut(); navigate('/'); }}>Sign out</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DrawerAuth() {
+  const { user, signOut } = useAuth();
+  if (user) {
+    return (
+      <>
+        <Link to="/account" className="btn btn-block">My account</Link>
+        <button className="btn btn-ghost btn-block" onClick={signOut}>Sign out</button>
+      </>
+    );
+  }
+  return (
+    <>
+      <Link to="/login" className="btn btn-block">Sign in</Link>
+      <Link to="/signup" className="btn btn-primary btn-block">Create free account</Link>
+    </>
   );
 }
 
@@ -171,7 +231,7 @@ export default function Header() {
             <Search />
             <ThemeToggle />
             <Link to="/pricing" className="btn btn-accent btn-sm hide-sm">Subscribe</Link>
-            <button className="btn btn-sm hide-sm">Sign in</button>
+            <UserMenu />
             <button className="icon-btn burger" onClick={() => setDrawer(true)} aria-label="Open menu">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
@@ -199,7 +259,7 @@ export default function Header() {
             ))}
             <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>
               <Link to="/pricing" className="btn btn-accent btn-block">Subscribe</Link>
-              <button className="btn btn-block">Sign in</button>
+              <DrawerAuth />
             </div>
           </aside>
         </div>

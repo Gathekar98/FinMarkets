@@ -280,6 +280,20 @@ export async function fundChart(code, range = '1Y') {
   return pts;
 }
 
+/** Live prices for an arbitrary set of stocks (tickers) and funds (AMFI codes). Used by watchlists and portfolios. */
+export async function prices({ stocks = '', funds = '' }) {
+  const tickers = String(stocks).split(',').map((s) => s.trim()).filter(Boolean).slice(0, 100);
+  const codes = String(funds).split(',').map((s) => Number(s)).filter(Boolean).slice(0, 100);
+  const [qs, u] = await Promise.all([
+    tickers.length ? yahoo.quotes(tickers.map(toSymbol)) : [],
+    codes.length ? amfi.universe() : null,
+  ]);
+  return {
+    stocks: Object.fromEntries(qs.map((q) => [tickerOf(q.symbol), { name: q.name, price: q.price, change: q.change, changePct: q.changePct, time: q.time }])),
+    funds: Object.fromEntries(codes.map((c) => u?.byCode[c]).filter(Boolean).map((f) => [f.code, { name: f.name, nav: f.nav, date: f.date, changePct: f.ret['1d'], category: f.category, rating: f.rating }])),
+  };
+}
+
 /* ------------------------------------------------------------------ search */
 
 export async function search(q) {

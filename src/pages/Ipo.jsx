@@ -16,6 +16,7 @@ export default function Ipo() {
 
       <section className="section tight">
         <div className="wrap">
+          <div className="note" style={{ marginBottom: 20 }}>Sample entries shown. The IPO calendar is maintained by our editors from exchange announcements and will be populated before launch.</div>
           <SectionHead eyebrow="Live now" title="Open for subscription" />
           <div className="grid-2">
             {open.map((i) => (

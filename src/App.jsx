@@ -16,6 +16,9 @@ import Stories from './pages/Stories';
 import StoryDetail from './pages/StoryDetail';
 import Pricing from './pages/Pricing';
 import NotFound from './pages/NotFound';
+import Account from './pages/Account';
+import { Login, Signup, ForgotPassword, ResetPassword, RequireAuth } from './pages/Auth';
+import { AuthProvider } from './auth/AuthContext';
 
 /** Scroll to top on route change, or to the #anchor when one is present. */
 function ScrollManager() {
@@ -32,7 +35,7 @@ function ScrollManager() {
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <ScrollManager />
       <Header />
       <main>
@@ -50,10 +53,15 @@ export default function App() {
           <Route path="/stories" element={<Stories />} />
           <Route path="/stories/:id" element={<StoryDetail />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />
-    </>
+    </AuthProvider>
   );
 }

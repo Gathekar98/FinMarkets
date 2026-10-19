@@ -1,4 +1,4 @@
-// Editorial content. Placeholder copy written for layout and tone; authors are fictional.
+// Editorial content. Editorial placeholder copy — replace with your own articles (or connect a CMS).
 
 export const storyCategories = ['Latest', 'Stock Ideas', 'Fund Picks', 'Fund Insight', 'Wealth Insight', 'Ask Us', 'Announcements'];
 
@@ -29,10 +29,10 @@ const body = {
 
 export const stories = [
   { id: 'gold-dhanteras-not-investing', title: 'Buying gold on Dhanteras is a ritual, not an investment', dek: 'Making charges, purity and buy-back discounts quietly eat into returns. Here is how to own gold sensibly.', category: 'Wealth Insight', author: 'rm', date: '18 Oct 2026', mins: 4, featured: true, tone: 'accent', body: body.dhanteras },
-  { id: 'indus-digital-next-phase', title: 'Indus Digital: what will drive its next leg of growth?', dek: 'Deal wins are strong, but margins are under pressure from wage hikes and pricing. We weigh both sides.', category: 'Stock Ideas', author: 'ak', date: '18 Oct 2026', mins: 6, tone: 'brand', body: body.generic },
+  { id: 'it-services-next-leg', title: 'IT services: what will drive the next leg of growth?', dek: 'Deal wins are strong, but margins are under pressure from wage hikes and pricing. We weigh both sides.', category: 'Stock Ideas', author: 'ak', date: '18 Oct 2026', mins: 6, tone: 'brand', body: body.generic },
   { id: 'equity-after-retirement', title: '75% in equity after retiring — brave or reckless?', dek: 'A reader asks whether a high equity share makes sense at 61. The answer depends on one number.', category: 'Ask Us', author: 'team', date: '17 Oct 2026', mins: 3, tone: 'navy', body: body.generic },
   { id: 'international-funds-shut', title: 'Most international funds are closed. Do you really need one?', dek: 'With overseas limits biting, domestic funds with global exposure may fill the gap.', category: 'Fund Insight', author: 'sd', date: '17 Oct 2026', mins: 6, tone: 'brand', body: body.generic },
-  { id: 'aravali-bank-provisions', title: "Aravali Bank's ₹8,400 crore provisioning question", dek: 'Can the bank absorb a large one-off hit without diluting shareholders? We run the numbers.', category: 'Stock Ideas', author: 'ak', date: '16 Oct 2026', mins: 5, tone: 'accent', body: body.generic },
+  { id: 'bank-provisions-question', title: 'When a bank takes a big provisioning hit', dek: 'Can a lender absorb a large one-off charge without diluting shareholders? How to read the numbers.', category: 'Stock Ideas', author: 'ak', date: '16 Oct 2026', mins: 5, tone: 'accent', body: body.generic },
   { id: 'listing-ran-ahead', title: 'A year after listing, the price has outrun the profits', dek: 'Post-IPO rallies are fun to watch. They are less fun when earnings fail to keep up.', category: 'Stock Ideas', author: 'vt', date: '15 Oct 2026', mins: 4, tone: 'navy', body: body.generic },
   { id: 'five-flexi-caps', title: 'Five flexi-cap funds that have earned a place in a core portfolio', dek: 'Consistency across market cycles, reasonable costs and a clear process — our shortlist.', category: 'Fund Picks', author: 'sd', date: '14 Oct 2026', mins: 7, tone: 'brand', body: body.generic },
   { id: 'rebalancing-drift', title: 'You chose 60:40. The market quietly made it 75:25', dek: 'Why an annual rebalancing check is the most underrated habit in investing.', category: 'Wealth Insight', author: 'vt', date: '13 Oct 2026', mins: 5, tone: 'accent', body: body.generic },
