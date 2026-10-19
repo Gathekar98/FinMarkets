@@ -1,56 +1,15 @@
+// Long-running server: local dev (`npm run dev`) and any host that runs `npm start`.
+// On Vercel this file is not used — see api/index.js.
 import express from 'express';
-import compression from 'compression';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import * as svc from './services.js';
+import { app, svc } from './app.js';
 
-const app = express();
 // `--port` (used by `npm run dev`) wins over PORT, so a dev tool's PORT for the web server can't collide with the API.
 const portArg = process.argv.indexOf('--port');
 const PORT = Number(portArg > 0 ? process.argv[portArg + 1] : process.env.PORT) || 8787;
 const DIST = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-
-app.use(compression());
-app.disable('x-powered-by');
-
-/** Wrap an async handler: JSON response, short browser cache, consistent errors. */
-const route = (fn, maxAge = 30) => async (req, res) => {
-  try {
-    const data = await fn(req);
-    if (data == null) return res.status(404).json({ error: 'Not found' });
-    res.set('Cache-Control', `public, max-age=${maxAge}`);
-    res.json(data);
-  } catch (err) {
-    console.error(`[api] ${req.originalUrl}:`, err.message);
-    res.status(502).json({ error: 'Upstream data source unavailable. Please try again shortly.' });
-  }
-};
-
-app.get('/api/health', (req, res) => res.json({ ok: true, time: Date.now() }));
-
-// Market
-app.get('/api/market/overview', route(() => svc.marketOverview()));
-app.get('/api/market/chart/:symbol', route((req) => svc.yahoo.chart(req.params.symbol, req.query.range), 120));
-
-// Stocks
-app.get('/api/stocks', route(() => svc.stockList()));
-app.get('/api/stocks/:ticker', route((req) => svc.stockDetail(req.params.ticker)));
-app.get('/api/stocks/:ticker/chart', route((req) => svc.yahoo.chart(svc.toSymbol(req.params.ticker), req.query.range), 120));
-
-// Funds
-app.get('/api/funds', route((req) => svc.fundList(req.query), 300));
-app.get('/api/funds/meta', route(() => svc.fundMeta(), 300));
-app.get('/api/funds/:code', route((req) => svc.fundDetail(Number(req.params.code)), 300));
-app.get('/api/funds/:code/chart', route((req) => svc.fundChart(Number(req.params.code), req.query.range), 600));
-
-// Batched prices for watchlists / portfolios
-app.get('/api/prices', route((req) => svc.prices(req.query), 30));
-
-// Search
-app.get('/api/search', route((req) => svc.search(String(req.query.q || '')), 60));
-
-app.use('/api', (req, res) => res.status(404).json({ error: 'Unknown endpoint' }));
 
 // Production: serve the built SPA
 if (fs.existsSync(DIST)) {

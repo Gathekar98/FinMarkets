@@ -2,7 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const DISK_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.cache');
+// Serverless hosts (Vercel) only allow writes to /tmp, which survives while a function instance stays warm.
+const DISK_DIR = process.env.VERCEL
+  ? path.join('/tmp', 'finmarkets-cache')
+  : path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.cache');
 const mem = new Map();
 const inflight = new Map();
 
