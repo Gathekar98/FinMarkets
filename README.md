@@ -1,5 +1,9 @@
 # finMarkets
 
+![finMarkets — invest with clarity, not noise](docs/thumbnail.png)
+
+**Live:** https://fin-markets.vercel.app
+
 Research, ratings and tools for Indian mutual funds and stocks: a React (Vite) frontend plus a small Node/Express API that pulls live market data, caches it and computes ratings.
 
 ## Run
