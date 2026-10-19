@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 -1.5 25 25" width="256" height="256" role="img" aria-label="finMarkets">
+  <circle cx="9.5" cy="11" r="7.5" fill="none" stroke="#0d6b56" stroke-width="4.4" stroke-dasharray="33 14.2" transform="rotate(-90 9.5 11)"/>
+  <circle cx="9.5" cy="11" r="7.5" fill="none" stroke="#e39b2d" stroke-width="4.4" stroke-dasharray="12 35.2" stroke-dashoffset="-34.5" transform="rotate(-90 9.5 11)"/>
+  <path d="M19.5 4V19" stroke="#111a2b" stroke-width="4.4" stroke-linecap="round"/>
+</svg>

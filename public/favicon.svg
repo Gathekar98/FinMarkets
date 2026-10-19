@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0F5C4D"/><path d="M7 22l6-7 4 4 8-10" stroke="#F2B544" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 -1.5 25 25">
+  <style>
+    .ink { stroke: #111a2b; } .main { stroke: #0d6b56; } .slice { stroke: #e39b2d; }
+    @media (prefers-color-scheme: dark) { .ink { stroke: #ffffff; } .main { stroke: #3fb594; } .slice { stroke: #f2b544; } }
+  </style>
+  <!-- finMarkets "portfolio a": pie-chart bowl + stem -->
+  <circle class="main" cx="9.5" cy="11" r="7.5" fill="none" stroke-width="4.4" stroke-dasharray="33 14.2" transform="rotate(-90 9.5 11)"/>
+  <circle class="slice" cx="9.5" cy="11" r="7.5" fill="none" stroke-width="4.4" stroke-dasharray="12 35.2" stroke-dashoffset="-34.5" transform="rotate(-90 9.5 11)"/>
+  <path class="ink" d="M19.5 4V19" stroke-width="4.4" stroke-linecap="round"/>
+</svg>

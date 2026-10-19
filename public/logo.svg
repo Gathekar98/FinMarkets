@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 4 516 92" width="516" height="92" role="img" aria-label="finMarkets">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;800&amp;display=swap'); text { font-family: Inter, 'Segoe UI', Arial, sans-serif; letter-spacing: -4px; fill: #111a2b; }</style>
+  <text x="0" y="86" font-size="100" font-weight="500">fin</text>
+  <text x="111.58" y="86" font-size="100" font-weight="800">M</text>
+  <svg x="203.92" y="27.7" width="61.09" height="58.3" viewBox="0 0 22 21" overflow="visible">
+    <circle cx="9.5" cy="11" r="7.5" fill="none" stroke="#0d6b56" stroke-width="4" stroke-dasharray="33 14.2" transform="rotate(-90 9.5 11)"/>
+    <circle cx="9.5" cy="11" r="7.5" fill="none" stroke="#e39b2d" stroke-width="4" stroke-dasharray="12 35.2" stroke-dashoffset="-34.5" transform="rotate(-90 9.5 11)"/>
+    <path d="M19.5 4V19" stroke="#111a2b" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <text x="267.02" y="86" font-size="100" font-weight="800">rkets</text>
+</svg>

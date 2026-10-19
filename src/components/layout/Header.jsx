@@ -4,15 +4,12 @@ import { navItems } from './nav';
 import { num } from '../../utils/format';
 import { api, useApi, LIVE } from '../../api/client';
 import { useAuth } from '../../auth/AuthContext';
+import Wordmark from '../ui/Wordmark';
 
 function Logo() {
   return (
     <Link to="/" className="logo" aria-label="finMarkets home">
-      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden>
-        <rect width="32" height="32" rx="8" fill="var(--brand)" />
-        <path d="M7 22l6-7 4 4 8-10" stroke="var(--accent)" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span>fin<b>Markets</b></span>
+      <Wordmark />
     </Link>
   );
 }

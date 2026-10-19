@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Wordmark from '../ui/Wordmark';
 
 const cols = [
   { title: 'Funds', links: [['Fund Screener', '/funds#screener'], ['Top Rated Funds', '/funds?rating=5'], ['Category Monitor', '/funds#categories'], ['New Fund Offers', '/funds#nfo'], ['Tax Saver Funds', '/funds?list=tax']] },
@@ -14,13 +15,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="footer-top">
           <div className="footer-brand">
-            <div className="logo" style={{ color: '#fff' }}>
-              <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden>
-                <rect width="32" height="32" rx="8" fill="#0f5c4d" />
-                <path d="M7 22l6-7 4 4 8-10" stroke="#f2b544" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span>fin<b>Markets</b></span>
-            </div>
+            <Link to="/" className="logo" aria-label="finMarkets home"><Wordmark onDark size={28} /></Link>
             <p>Independent research, honest ratings and simple tools to help Indian families invest with confidence.</p>
             <form className="footer-news" onSubmit={(e) => e.preventDefault()}>
               <label htmlFor="news" className="visually-hidden">Email address</label>
